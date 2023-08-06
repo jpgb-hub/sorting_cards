@@ -1,5 +1,4 @@
 /* eslint-disable */
-/* eslint-disable */
 import "bootstrap";
 import "./style.css";
 
@@ -20,7 +19,7 @@ window.onload = function() {
     "K"
   ];
   const suits = ["♠", "♣", "♥", "♦"];
-  let deck = []; // added a global array to hold the generated cards
+  let deck = [];
 
   function getRandomIndex(max) {
     return Math.floor(Math.random() * max);
@@ -36,17 +35,23 @@ window.onload = function() {
   }
 
   function generateCards() {
-    deck = []; // reset the deck array
+    deck = [];
     let numCards = document.getElementById("numInput").value;
+
+    // Create a new container for these cards
+    const cardContainer = document.querySelector(".card-container");
+    const newContainer = document.createElement("div");
+    newContainer.classList.add("container");
+    cardContainer.appendChild(newContainer);
+
     for (let i = 0; i < numCards; i++) {
       let card = getRandomCard();
-      deck.push(card); // add the card to the deck array
-      displayCard(card);
+      deck.push(card);
+      displayCard(card, newContainer);
     }
   }
 
-  function displayCard(card) {
-    const cardContainer = document.querySelector(".card-container");
+  function displayCard(card, containerElement) {
     const cardElement = document.createElement("div");
     cardElement.classList.add("card");
 
@@ -69,7 +74,7 @@ window.onload = function() {
     cardElement.appendChild(suitTopElement);
     cardElement.appendChild(numberElement);
     cardElement.appendChild(suitBottomElement);
-    cardContainer.appendChild(cardElement);
+    containerElement.appendChild(cardElement);
   }
 
   document.getElementById("submitBtn").addEventListener("click", function() {
@@ -85,44 +90,41 @@ window.onload = function() {
     }
   });
 
-  document.getElementById("resetBtn").addEventListener("click", function() {
-    document.getElementById("numInput").value = "";
-    const cardContainer = document.querySelector(".card-container");
-    while (cardContainer.firstChild) {
-      cardContainer.firstChild.remove();
-    }
-    deck = []; // reset the deck array
-  });
-
-  document.getElementById("sortBtn").addEventListener("click", function() {
-    // Selection sort
-    for (let i = 0; i < deck.length; i++) {
-      let min = i;
-      for (let j = i + 1; j < deck.length; j++) {
-        if (compareCards(deck[j], deck[min]) < 0) {
-          min = j;
+  document
+    .getElementById("sortBtn")
+    .addEventListener("click", async function() {
+      // Selection sort
+      for (let i = 0; i < deck.length; i++) {
+        let min = i;
+        for (let j = i + 1; j < deck.length; j++) {
+          if (compareCards(deck[j], deck[min]) < 0) {
+            min = j;
+          }
         }
+        if (min !== i) {
+          let temp = deck[i];
+          deck[i] = deck[min];
+          deck[min] = temp;
+        }
+
+        // Create new container for the sorted step
+        const cardContainer = document.querySelector(".card-container");
+        const sortedStepContainer = document.createElement("div");
+        sortedStepContainer.classList.add("container");
+        cardContainer.appendChild(sortedStepContainer);
+
+        // Display the current state of deck
+        deck.forEach(card => displayCard(card, sortedStepContainer));
+
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-      if (min !== i) {
-        let temp = deck[i];
-        deck[i] = deck[min];
-        deck[min] = temp;
-      }
-    }
-    // Redraw the sorted cards
-    const cardContainer = document.querySelector(".card-container");
-    while (cardContainer.firstChild) {
-      cardContainer.firstChild.remove();
-    }
-    deck.forEach(card => displayCard(card));
-  });
+    });
 
   function compareCards(a, b) {
-    // Only compare numbers
     const numberAIndex = numbers.indexOf(a.number);
     const numberBIndex = numbers.indexOf(b.number);
     if (numberAIndex < numberBIndex) return -1;
     if (numberAIndex > numberBIndex) return 1;
-    return 0; // cards are the same
+    return 0;
   }
 };
